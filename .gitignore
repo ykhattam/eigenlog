@@ -1,0 +1,5 @@
+mylog.csv
+*.db
+*.sqlite
+reflections/
+__pycache__/

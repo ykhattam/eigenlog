@@ -1,4 +1,5 @@
 """eigenlog.py: a mind you can run.
+The shipped demo log is invented, not a record of real days.
 It keeps a map of categories, a log of reflections, a register of claims with honest statuses, and a record of what did not fit the map.
 """
 import copy
@@ -61,7 +62,6 @@ class Mind:
     def claim(self, text, status="unverified", test=None, source=None, from_entry=None):
         if status not in STATUSES:
             raise ValueError(f"status must be one of {STATUSES}")
-        # CRITICAL FIX: Verified claims MUST have a test and a source
         if status == "verified" and not (test and source):
             raise ValueError("a verified claim needs a test and a source")
         self.claims.append({"text": text, "status": status, "test": test, "source": source, "from_entry": from_entry})
@@ -163,6 +163,7 @@ if __name__ == "__main__":
     mind.claim("inclusive reasons sits under love's 'why' group", "unverified")
     assert len(mind.definitions) == 2
     
+    # Three invented example days, to test the state-or-relief idea. Replace with real ones.
     mind.reflect("example mood", "heavy day", 7, when="2026-11-02")
     mind.reflect("example mood", "lighter", 5, when="2026-11-03")
     mind.reflect("example mood", "heavy, long, relaxed at the end", 4, "state or relief?", when="2026-11-04")

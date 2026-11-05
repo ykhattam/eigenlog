@@ -4,6 +4,7 @@ to re-check them; it stops with an error if a verified claim stops being true.
 It writes claims.md, which the README links to.
 """
 from eigenlog import Mind, WORLD, flatten
+import os
 
 n_categories = len(WORLD)
 n_words = len(set(flatten(WORLD)))
@@ -11,19 +12,19 @@ PUBLIC = {name for name in dir(Mind) if not name.startswith("_")}
 
 def rejects_typo():
     try:
-        Mind().define("inclusive reason", "x")      # a misspelt term
+        Mind().define("inclusive reason", "x")
     except ValueError:
         return True
     return False
 
 def accepts_wrong_definition():
     m = Mind()
-    m.define("measured truth", "a feeling")         # well formed, but wrong
+    m.define("measured truth", "a feeling")
     return m.definitions["measured truth"] == "a feeling"
 
 def catches_repeat():
     m = Mind()
-    m.world["art"].append("stars")                  # "stars" is already in universe
+    m.world["art"].append("stars")
     return "stars" in m.overlaps()
 
 def minds_are_independent():
@@ -33,7 +34,7 @@ def minds_are_independent():
 
 def verified_needs_working():
     try:
-        Mind().claim("x", "verified")          # no test, no source
+        Mind().claim("x", "verified")
     except ValueError:
         return True
     return False
@@ -58,7 +59,7 @@ CLAIMS = [
     ("No word in the map has a stray leading or trailing space.", "verified", "every word from flatten() equals its stripped form", "ran it", no_stray_spaces),
     ("The code does not model links between categories.", "verified", "Mind has no links attribute", "ran it", lambda: not hasattr(Mind(), "links")),
     ("No function in the code addresses why we exist.", "verified", "the public methods are only the ones listed here", "ran it", lambda: PUBLIC == {"reflect", "claim", "define", "resolve_doubt", "surprise", "read", "open_doubts", "change", "human", "known", "orphans", "overlaps", "park", "pressure", "query", "save"}),
-    ("The shipped demo log is invented, not a record of real days.", "verified", "the demo says so in its comments", "read the file", lambda: "invented" in open("eigenlog.py").read()),
+    ("The shipped demo log is invented, not a record of real days.", "verified", "the demo says so in its comments", "read the file", lambda: "invented" in open(os.path.abspath(__file__).replace("post_claims.py", "eigenlog.py")).read()),
     ("Careful analysis cuts some errors, such as unclear words and inconsistent claims.", "unverified", "compare logged errors before and after using the habits", "author", None),
     ("Careful analysis does not cut wrong premises or missing data.", "unverified", "the code accepts a wrong definition, which shows one case, not the general rule", "author", None),
     ("Logic clarifies the frameworks we think in.", "unverified", "no test proposed", "author", None),
@@ -89,6 +90,7 @@ if __name__ == "__main__":
             if c["status"] == status:
                 lines += [f"{c['text']} Checked by: {c['test']} ({c['source']}).", ""]
                 
-    open("claims.md", "w").write("\n".join(lines))
+    with open("claims.md", "w") as f:
+        f.write("\n".join(lines))
     counts = {s: sum(c["status"] == s for c in mind.claims) for s in order}
     print(counts)

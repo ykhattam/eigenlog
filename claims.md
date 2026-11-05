@@ -1,6 +1,7 @@
 # Claims in the post, with status
 
-Verified means the check ran and passed (`python post_claims.py`). Unverified means untested. Contested means informed people disagree.
+Verified means the check ran and passed (`python post_claims.py`). 
+Unverified means untested. Contested means informed people disagree.
 
 ## Verified
 

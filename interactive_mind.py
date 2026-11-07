@@ -148,7 +148,7 @@ def main():
                     LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
                     LOCAL_MODEL_NAME = os.getenv("LOCAL_MODEL_NAME", "qwen2.5-coder")
                     payload = {
-                        "model": LOCAL_MODEL_NAME,
+                        "model": "/home/khattam/.local/share/oubliette/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
                         "messages": [
                             {"role": "system", "content": "You are a rigorous dialectical opponent maintaining conversational epistemic friction."},
                             {"role": "user", "content": dialogue_prompt}

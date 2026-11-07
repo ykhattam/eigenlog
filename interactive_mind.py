@@ -52,29 +52,27 @@ def run():
     cfg = load_config()
     
     # Ask for Heat Dial level (with saved default representation)
-    heat_input = input(f"Select AI Heat Dial:\n  [1] Mirror / Supportive\n  [2] Dialectic / Questioning\n  [3] Forensic / Adversarial\nSelect [1/2/3] (Press Enter for saved default {cfg['heat_level']}): ").strip()
-    heat_level = int(heat_input) if heat_input in ('1', '2', '3') else cfg['heat_level']
+    heat_input = input(f"Select AI Heat Dial:\n  [0] Cold Mode + Grammar/Logic Review\n  [1] Mirror / Supportive\n  [2] Dialectic / Questioning\n  [3] Forensic / Adversarial\nSelect [0/1/2/3] (Press Enter for saved default {cfg['heat_level']}): ").strip()
+    heat_level = int(heat_input) if heat_input in ('0', '1', '2', '3') else cfg['heat_level']
     
     # Ask for mode (with saved default representation)
-    mode_input = input(f"Select mode:\n  [1] Normal / Database logging only\n  [2] Interactive with Local LLM critique\n  [3] Cold Mode (No AI critique for deep independent thinking)\nSelect [1/2/3] (Press Enter for saved default {cfg['mode']}): ").strip()
+    mode_input = input(f"Select mode:\n  [1] Normal / Database logging only\n  [2] Interactive with Local LLM critique\n  [3] Pure Cold Mode (No AI)\nSelect [1/2/3] (Press Enter for saved default {cfg['mode']}): ").strip()
     mode = mode_input if mode_input in ('1', '2', '3') else cfg['mode']
     
     save_config(mode, heat_level)
     
-    use_ai = (mode == '2')
+    use_ai = (mode == '2') or (heat_level == 0)
     
-    if mode == '3':
-        print("-> Cold Mode active. Solitary, unassisted introspection enabled.")
-        print("-> Tip: Even without AI critique, you can run a local grammar & logical coherence check.")
-        check_grammar = input("Would you like a grammar and consistency check (via local LLM without adversarial challenge)? [y/N]: ").strip().lower()
-        use_ai = (check_grammar == 'y')
-        if use_ai:
-            if check_server():
-                print("-> Gentle grammar & logic checker enabled.\n")
-                heat_level = 0
-            else:
-                print("-> Warning: Local LLM server not active. Proceeding pure cold.\n")
-                use_ai = False
+    if mode == '3' and heat_level != 0:
+        print("-> Pure Cold Mode active. Solitary, unassisted introspection enabled.\n")
+        use_ai = False
+    elif heat_level == 0:
+        if check_server():
+            print("-> Gentle grammar & logic checker enabled (Cold Mode + Review).\n")
+            use_ai = True
+        else:
+            print("-> Warning: Local LLM server not active. Proceeding pure cold.\n")
+            use_ai = False
     elif use_ai:
         if check_server():
             print("-> Local LLM critic enabled.\n")

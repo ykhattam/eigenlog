@@ -26,6 +26,8 @@ def critique(observation, subject="general", world_keys=None, heat_level=2, epis
     
     if is_sensitive:
         system_prompt = f"You are a compassionate, philosophically attuned reflective mirror. Do not demand evidence or treat this as a falsifiable hypothesis. Reflect the emotional weight, explore the tension, and ask one open-ended, compassionate, yet probing question about the experience of this feeling, not its logical validity. {world_context}"
+    elif heat_level == 0:  # Gentle Grammar & Consistency Check for Cold Mode
+        system_prompt = f"You are a gentle copyeditor and logical consistency assistant. Review the user's observation solely for grammar, clarity, and internal logical coherence. Point out any minor grammatical errors or minor contradictions respectfully, without challenging their emotional state or acting as an adversarial critic. {world_context}"
     else:
         prompts = {
             1: "You are a supportive, reflective mirror. Validate the user's emotion and offer gentle perspective.",

@@ -57,7 +57,17 @@ def main():
     use_ai = (mode == '2')
     
     if mode == '3':
-        print("-> Cold Mode active. Solitary, unassisted introspection enabled.\n")
+        print("-> Cold Mode active. Solitary, unassisted introspection enabled.")
+        print("-> Tip: Even without AI critique, you can run a local grammar & logical coherence check.")
+        check_grammar = input("Would you like a grammar and consistency check (via local LLM without adversarial challenge)? [y/N]: ").strip().lower()
+        use_ai = (check_grammar == 'y')
+        if use_ai:
+            if check_server():
+                print("-> Gentle grammar & logic checker enabled.\n")
+                heat_level = 0
+            else:
+                print("-> Warning: Local LLM server not active. Proceeding pure cold.\n")
+                use_ai = False
     elif use_ai:
         if check_server():
             print("-> Local LLM critic enabled.\n")

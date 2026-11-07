@@ -1,4 +1,6 @@
+log.csv
 mylog.csv
+.eigenlog_config
 *.db
 *.sqlite
 reflections/

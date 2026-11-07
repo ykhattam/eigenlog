@@ -2,8 +2,29 @@
 Allows entering any subject or multi-tag freely, with optional local Qwen AI critique.
 """
 import sys
+import os
+import json
 from eigenlog import Mind, WORLD_REFERENCES
 from ai_critic import critique, check_server
+
+CONFIG_FILE = ".eigenlog_config"
+
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"mode": "1", "heat_level": 2}
+
+def save_config(mode, heat_level):
+    try:
+        with open(CONFIG_FILE, "w") as f:
+            json.dump({"mode": mode, "heat_level": heat_level}, f)
+        os.chmod(CONFIG_FILE, 0o600)
+    except Exception:
+        pass
 
 def main():
     m = Mind()
@@ -21,11 +42,18 @@ def main():
 
     print("--- Eigenlog Fluid Practice ---")
     
-    # Ask for Heat Dial level at start of session
-    heat_input = input("Select AI Heat Dial:\n  [1] Mirror / Supportive\n  [2] Dialectic / Questioning (Default)\n  [3] Forensic / Adversarial\nSelect [1/2/3] (Press Enter for 2): ").strip()
-    heat_level = int(heat_input) if heat_input in ('1', '2', '3') else 2
+    cfg = load_config()
     
-    mode = input("Select mode:\n  [1] Normal / Database logging only\n  [2] Interactive with Local LLM critique\n  [3] Cold Mode (No AI critique for deep independent thinking)\nSelect [1/2/3]: ").strip()
+    # Ask for Heat Dial level (with saved default representation)
+    heat_input = input(f"Select AI Heat Dial:\n  [1] Mirror / Supportive\n  [2] Dialectic / Questioning\n  [3] Forensic / Adversarial\nSelect [1/2/3] (Press Enter for saved default {cfg['heat_level']}): ").strip()
+    heat_level = int(heat_input) if heat_input in ('1', '2', '3') else cfg['heat_level']
+    
+    # Ask for mode (with saved default representation)
+    mode_input = input(f"Select mode:\n  [1] Normal / Database logging only\n  [2] Interactive with Local LLM critique\n  [3] Cold Mode (No AI critique for deep independent thinking)\nSelect [1/2/3] (Press Enter for saved default {cfg['mode']}): ").strip()
+    mode = mode_input if mode_input in ('1', '2', '3') else cfg['mode']
+    
+    save_config(mode, heat_level)
+    
     use_ai = (mode == '2')
     
     if mode == '3':

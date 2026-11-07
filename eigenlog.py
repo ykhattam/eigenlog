@@ -166,9 +166,14 @@ class Mind:
         return pd.read_sql(sql, con)
 
     def save(self, path="log.csv"):
+        import os
         out = self.read()
         out["resolved"] = out["resolved"].astype(int)
         out.to_csv(path, index=False)
+        try:
+            os.chmod(path, 0o600)
+        except OSError:
+            pass
 
 if __name__ == "__main__":
     mind = Mind()

@@ -5,3 +5,4 @@ mylog.csv
 *.sqlite
 reflections/
 __pycache__/
+log.csv.migrated

@@ -4,10 +4,140 @@ Allows entering any subject or multi-tag freely, with optional local Qwen AI cri
 import sys
 import os
 import json
+import sqlite3
+from datetime import date
+from pydantic import BaseModel, Field, ValidationError
 from eigenlog import Mind, WORLD_REFERENCES
-from ai_critic import critique, check_server
+from ai_critic import critique, check_server, Dialogue
 
 CONFIG_FILE = ".eigenlog_config"
+DB_FILE = "eigenlog.db"
+
+class LogEntry(BaseModel):
+    id: int
+    when: str
+    subject: str = Field(..., min_length=1)
+    observation: str = Field(..., min_length=1)
+    measure: str | None = None
+    doubt: str | None = None
+    struggle: str | None = None
+    resolved: int = 0
+
+
+class PersistentMind(Mind):
+    def __init__(self, db_path=DB_FILE):
+        super().__init__()
+        self.db_path = db_path
+        self._init_db()
+        self.load_from_db()
+
+    def _init_db(self):
+        con = sqlite3.connect(self.db_path)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS entries (
+                id INTEGER PRIMARY KEY,
+                when_date TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                observation TEXT NOT NULL,
+                measure TEXT,
+                doubt TEXT,
+                struggle TEXT,
+                resolved INTEGER DEFAULT 0
+            )
+        """)
+        con.commit()
+        con.close()
+        try:
+            os.chmod(self.db_path, 0o600)
+        except OSError:
+            pass
+        self._migrate_csv()
+
+    def _migrate_csv(self):
+        """One-time import of a legacy log.csv if the DB has no rows yet."""
+        csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log.csv")
+        if not os.path.exists(csv_path):
+            return
+        con = sqlite3.connect(self.db_path)
+        existing = con.execute("SELECT COUNT(*) FROM entries").fetchone()[0]
+        if existing:
+            con.close()
+            return
+        try:
+            import pandas as pd
+            df = pd.read_csv(csv_path)
+            n = 0
+            for _, row in df.iterrows():
+                try:
+                    entry = LogEntry(
+                        id=int(row.get("id", n)),
+                        when=str(row.get("when", "")),
+                        subject=str(row.get("subject", "general")),
+                        observation=str(row.get("observation", "")),
+                        measure=None if pd.isna(row.get("measure")) else str(row.get("measure")),
+                        doubt=None if pd.isna(row.get("doubt")) else str(row.get("doubt")),
+                        struggle=None if pd.isna(row.get("struggle")) else str(row.get("struggle")),
+                        resolved=int(bool(row.get("resolved", 0))),
+                    )
+                except (ValidationError, ValueError, TypeError):
+                    continue
+                con.execute(
+                    "INSERT OR REPLACE INTO entries (id, when_date, subject, observation, measure, doubt, struggle, resolved) VALUES (?,?,?,?,?,?,?,?)",
+                    (entry.id, entry.when, entry.subject, entry.observation, entry.measure, entry.doubt, entry.struggle, entry.resolved),
+                )
+                n += 1
+            con.commit()
+            con.close()
+            if n:
+                os.rename(csv_path, csv_path + ".migrated")
+                print(f"[migration: imported {n} entries from log.csv into eigenlog.db; log.csv renamed to log.csv.migrated]")
+        except Exception as e:
+            con.close()
+            print(f"[migration skipped: {e}]")
+
+    def load_from_db(self):
+        con = sqlite3.connect(self.db_path)
+        cur = con.cursor()
+        cur.execute("SELECT id, when_date, subject, observation, measure, doubt, struggle, resolved FROM entries ORDER BY id ASC")
+        rows = cur.fetchall()
+        con.close()
+        
+        self.entries = []
+        for r in rows:
+            try:
+                entry_data = {
+                    "id": r[0],
+                    "when": r[1],
+                    "subject": r[2],
+                    "observation": r[3],
+                    "measure": r[4],
+                    "doubt": r[5],
+                    "struggle": r[6],
+                    "resolved": r[7]
+                }
+                validated = LogEntry(**entry_data)
+                self.entries.append(validated.model_dump())
+            except ValidationError as e:
+                print(f"[Schema Validation Error on row {r[0]}: {e}]")
+
+    def save_entry_to_db(self, entry):
+        validated = LogEntry(**entry)
+        con = sqlite3.connect(self.db_path)
+        con.execute("""
+            INSERT OR REPLACE INTO entries (id, when_date, subject, observation, measure, doubt, struggle, resolved)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (validated.id, validated.when, validated.subject, validated.observation, validated.measure, validated.doubt, validated.struggle, validated.resolved))
+        con.commit()
+        con.close()
+        try:
+            os.chmod(self.db_path, 0o600)
+        except OSError:
+            pass
+
+    def reflect(self, subject, observation, measure=None, doubt=None, struggle=None, when=None):
+        entry_id = super().reflect(subject, observation, measure, doubt, struggle, when)
+        self.save_entry_to_db(self.entries[-1])
+        return entry_id
 
 def load_config():
     if os.path.exists(CONFIG_FILE):
@@ -34,7 +164,7 @@ def main():
         return
 
 def run():
-    m = Mind()
+    m = PersistentMind()
     
     # Handle Frictionless Micro-Log CLI Arguments (eigenlog -q / quick)
     if len(sys.argv) > 1 and sys.argv[1] in ("-q", "--quick", "quick"):
@@ -43,8 +173,7 @@ def run():
             sys.exit(1)
         observation = " ".join(sys.argv[2:])
         entry_id = m.reflect(subject="general", observation=observation)
-        m.save()
-        print(f"-> Frictionless Micro-Log recorded: #{entry_id} under [general]. Saved successfully.")
+        print(f"-> Frictionless Micro-Log recorded: #{entry_id} under [general]. Saved to eigenlog.db.")
         sys.exit(0)
 
     print("--- Eigenlog Fluid Practice ---")
@@ -131,6 +260,7 @@ def run():
             print(f"\n[Asking Local LLM for {label}...]")
             feedback = critique(observation, subject, world_keys=m.world.keys(), heat_level=heat_level, epistemic_tag=tag_str)
             print(f"Local LLM: {feedback}")
+            dialogue = Dialogue(subject, heat_level=heat_level, epistemic_tag=tag_str, world_keys=m.world.keys())
             
             # Interactive feedback & control options
             while True:
@@ -149,7 +279,7 @@ def run():
                     break
                 elif choice == 'r':
                     print("\n[Re-generating critique...]")
-                    feedback = critique(observation, subject, world_keys=m.world.keys())
+                    feedback = critique(observation, subject, world_keys=m.world.keys(), heat_level=heat_level, epistemic_tag=tag_str)
                     print(f"Local LLM: {feedback}\n")
                 elif choice.isdigit() and 1 <= int(choice) <= 5:
                     print(f"-> Telemetry recorded: Rating {choice}/5.\n")
@@ -157,30 +287,11 @@ def run():
                 else:
                     # Treat input as a direct dialogue/reply
                     print("[Thinking...]")
-                    dialogue_prompt = f"Previous observation: {observation}\nCritique: {feedback}\nUser response: {choice}\n\nProvide a brief, challenging follow-up question or perspective (1 sentence):"
-                    
-                    import os
-                    import requests
-                    LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
-                    LOCAL_MODEL_NAME = os.getenv("LOCAL_MODEL_NAME", "qwen2.5-coder")
-                    payload = {
-                        "model": "/home/khattam/.local/share/oubliette/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
-                        "messages": [
-                            {"role": "system", "content": "You are a rigorous dialectical opponent maintaining conversational epistemic friction."},
-                            {"role": "user", "content": dialogue_prompt}
-                        ],
-                        "temperature": 0.6,
-                        "max_tokens": 60
-                    }
-                    try:
-                        r = requests.post(LMS_URL, json=payload, timeout=60)
-                        if r.status_code == 200:
-                            feedback = r.json()["choices"][0]["message"]["content"].strip()
-                            print(f"Local LLM: {feedback}")
-                        else:
-                            print("[LLM Error]")
-                    except Exception as e:
-                        print(f"[Error: {e}]")
+                    reply, warning = dialogue.send(choice)
+                    if warning:
+                        print(warning)
+                    feedback = reply
+                    print(f"Local LLM: {feedback}")
         else:
             print()
 

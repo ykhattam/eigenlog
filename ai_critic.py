@@ -15,6 +15,77 @@ def check_server():
     except Exception:
         return False
 
+def _approx_tokens(text):
+    return max(1, len(text) // 4)
+
+class Dialogue:
+    """Multi-turn stateful dialogue with explicit context-window management."""
+
+    def __init__(self, subject, heat_level=2, epistemic_tag="hypothesis",
+                 world_keys=None, max_context_tokens=None, reply_reserve=512):
+        self.subject = subject
+        self.heat_level = heat_level
+        self.max_context_tokens = max_context_tokens or int(os.getenv("EIGENLOG_CTX_TOKENS", "4096"))
+        self.reply_reserve = reply_reserve
+        self.history = []          # [{role, content}]
+        self.warnings = []
+
+    def _system(self):
+        return (
+            f"You are a rigorous dialectical partner exploring the domain '{self.subject}'. "
+            "Maintain conversational epistemic friction. Ask one sharp question per turn. "
+            "Respond in the language the user writes in."
+        )
+
+    def _budget(self):
+        return self.max_context_tokens - self.reply_reserve
+
+    def _prune(self):
+        """Drop oldest turns until the prompt fits the budget. Returns True if anything was dropped."""
+        dropped = 0
+        while True:
+            used = _approx_tokens(self._system()) + sum(_approx_tokens(m["content"]) for m in self.history)
+            if used <= self._budget() or len(self.history) <= 1:
+                break
+            self.history.pop(0)
+            dropped += 1
+        return dropped
+
+    def send(self, user_text):
+        """Append a user turn, prune if needed, call the model, append the reply.
+        Returns (reply_text, warning_or_None)."""
+        self.history.append({"role": "user", "content": user_text})
+        dropped = self._prune()
+        warning = None
+        if dropped:
+            warning = (
+                f"[context: dropped {dropped} oldest turn(s) to stay under "
+                f"{self.max_context_tokens} tokens; earlier dialogue is no longer visible to the model]"
+            )
+        used = _approx_tokens(self._system()) + sum(_approx_tokens(m["content"]) for m in self.history)
+        if not dropped and used >= 0.85 * self._budget():
+            warning = f"[context: ~{used}/{self._budget()} tokens used — next turn may start truncating]"
+
+        payload = {
+            "model": LOCAL_MODEL_NAME,
+            "messages": [{"role": "system", "content": self._system()}] + self.history[-12:],
+            "temperature": 0.2 if self.heat_level == 0 else 0.6,
+            "max_tokens": min(self.reply_reserve, 512),
+        }
+        try:
+            r = requests.post(LMS_URL, json=payload, timeout=60)
+            if r.status_code != 200:
+                return f"[LLM Error: HTTP {r.status_code}]", warning
+            choice = r.json()["choices"][0]
+            reply = choice["message"]["content"].strip()
+            if choice.get("finish_reason") == "length":
+                reply += "\n[...response truncated, increase max_tokens]"
+        except Exception as e:
+            return f"[LLM Request Failed: {e}]", warning
+        self.history.append({"role": "assistant", "content": reply})
+        return reply, warning
+
+
 def critique(observation, subject="general", world_keys=None, heat_level=2, epistemic_tag="hypothesis"):
     if not check_server():
         return "[Local LLM server not reachable at http://127.0.0.1:8080]"

@@ -13,23 +13,41 @@ STATUSES = ("verified", "unverified", "contested")
 COLUMNS = ["id", "when", "subject", "observation", "measure", "doubt", "struggle", "resolved"]
 
 WORLD = {
-    "body": {"human": ["organs", "emotions", "thoughts", "behaviours"], "brain": ["amygdala", "prefrontal cortex", "eyes", "neurons"]},
-    "family": {"pa": UNKNOWN, "ma": UNKNOWN, "g-ma": UNKNOWN, "g-pa": UNKNOWN, "step-pa": NOT_APPLICABLE, "sis": UNKNOWN},
-    "universe": ["planets", "animals", "aliens", "stars"],
-    "quant": ["maths", "ratio", "measured truth"],
-    "qual": ["feel", "beauty", "texture", "touch"],
-    "frameworks": ["subject", "variables", "parameters", "debatable inputs"],
-    "culture": ["subconscious", "repeated stories", "ancient civilisation", "accumulated wisdom"],
-    "electronics": ["functions", "surveillance", "tech", "binaries", "high systems"],
-    "bias": ["value judgement", "positivism", "acceptance", "rights", "pre-existing catechism"],
-    "art": ["words", "painting", "sports", "program"],
-    "time": {"past": 1, "present": 0, "future": -1},
-    "meaning": ["metaphor", "logic", "illogic", "interpreted truth", "phone: a universe portal in a universe"],
+    "body": {
+        "human": ["organs", "emotions", "thoughts", "behaviours", "sleep", "energy", "tension"],
+        "brain": ["amygdala", "prefrontal cortex", "eyes", "neurons", "neurotransmitters", "fatigue"]
+    },
+    "family": {
+        "pa": UNKNOWN, "ma": UNKNOWN, "g-ma": UNKNOWN, "g-pa": UNKNOWN, 
+        "step-pa": NOT_APPLICABLE, "sis": UNKNOWN, "partner": UNKNOWN, "children": UNKNOWN
+    },
+    "universe": ["planets", "animals", "aliens", "stars", "nature", "physics"],
+    "quant": ["maths", "ratio", "measured truth", "statistics", "time metrics"],
+    "qual": ["feel", "beauty", "texture", "touch", "resonance", "harmony"],
+    "frameworks": ["subject", "variables", "parameters", "debatable inputs", "models"],
+    "culture": ["subconscious", "repeated stories", "ancient civilisation", "accumulated wisdom", "society"],
+    "electronics": ["functions", "surveillance", "tech", "binaries", "high systems", "code", "ai"],
+    "bias": ["value judgement", "positivism", "acceptance", "rights", "pre-existing catechism", "blind spots"],
+    "art": ["words", "painting", "sports", "program", "music", "expression"],
+    "time": {"past": 1, "present": 0, "future": -1, "urgency": 2, "patience": -2},
+    "meaning": ["metaphor", "logic", "illogic", "interpreted truth", "phone: a universe portal in a universe", "purpose"],
     "data": list(STATUSES),
-    "love": {"feelings": ["strong feelings", "attraction", "obsession"], "conduct": ["care", "duty", "discipline", "big heart"], "what happens": ["hurt", "surprise", "delayed reciprocity"], "why": ["inclusive reasons"]},
-    "grief": ["repeated reminiscence", "nostalgia", "missing for the individual", "wishful idealism of the person"],
+    "love": {
+        "feelings": ["strong feelings", "attraction", "obsession", "warmth", "safety"], 
+        "conduct": ["care", "duty", "discipline", "big heart", "vulnerability"], 
+        "what happens": ["hurt", "surprise", "delayed reciprocity", "healing"], 
+        "why": ["inclusive reasons", "connection", "shared reality"]
+    },
+    "grief": ["repeated reminiscence", "nostalgia", "missing for the individual", "wishful idealism of the person", "acceptance of loss"],
     "betrayal": ["indirect sensitive information", "action < words", "egoism > altruism", "disrespect for time", "devaluation of the partner", "inequitable representation of reality"],
     "real experience": ["much unquantifiable data", "pronunciation", "self-behaving", "movement", "intersection of emotions with body"],
+    "emotions": {
+        "joy": ["excitement", "gratitude", "relief", "peace"],
+        "fear": ["anxiety", "doubt", "hesitation", "threat detection"],
+        "anger": ["frustration", "boundary violation", "impatience", "drive"],
+        "sadness": ["melancholy", "loss", "loneliness", "reflection"]
+    },
+    "spirit": ["intuition", "flow", "alignment", "existential peace", "curiosity"],
     "other": [],
 }
 

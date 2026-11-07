@@ -6,18 +6,19 @@ from ai_critic import critique, check_server
 
 def main():
     m = Mind()
-    print("--- Eigenlog Fluid Practice with Local AI ---")
+    print("--- Eigenlog Fluid Practice ---")
     
-    use_ai = False
-    if check_server():
-        choice = input("Local Qwen LLM server detected on port 8080. Enable AI critique? [y/N]: ").strip().lower()
-        if choice == 'y':
-            use_ai = True
+    mode = input("Select mode: [1] Normal / Database logging only, [2] Interactive with Local Qwen AI critique [1/2]: ").strip()
+    use_ai = (mode == '2')
+    
+    if use_ai:
+        if check_server():
             print("-> Local Qwen AI critic enabled.\n")
         else:
-            print("-> Continuing without AI critique.\n")
+            print("-> Warning: Local LLM server not active at http://127.0.0.1:8080. Falling back to normal mode.\n")
+            use_ai = False
     else:
-        print("-> Local LLM server not active at http://127.0.0.1:8080. Running standard mode.\n")
+        print("-> Running in normal database/log mode.\n")
 
     print(f"Known world references for inspiration: {list(m.world.keys())}\n")
     

@@ -27,7 +27,7 @@ def critique(observation, subject="general"):
         "max_tokens": 50
     }
     try:
-        r = requests.post(LMS_URL, json=payload, timeout=2)
+        r = requests.post(LMS_URL, json=payload, timeout=6)
         if r.status_code == 200:
             data = r.json()
             return data["choices"][0]["message"]["content"].strip()

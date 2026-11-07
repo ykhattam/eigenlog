@@ -8,12 +8,12 @@ def main():
     m = Mind()
     print("--- Eigenlog Fluid Practice ---")
     
-    mode = input("Select mode: [1] Normal / Database logging only, [2] Interactive with Local Qwen AI critique [1/2]: ").strip()
+    mode = input("Select mode: [1] Normal / Database logging only, [2] Interactive with Local LLM critique [1/2]: ").strip()
     use_ai = (mode == '2')
     
     if use_ai:
         if check_server():
-            print("-> Local Qwen AI critic enabled.\n")
+            print("-> Local LLM critic enabled.\n")
         else:
             print("-> Warning: Local LLM server not active at http://127.0.0.1:8080. Falling back to normal mode.\n")
             use_ai = False

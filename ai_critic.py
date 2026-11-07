@@ -1,11 +1,12 @@
-"""ai_critic.py: Local LLM critic using Qwen 2.5 Coder via llama-server.
-Designed to enforce epistemic friction, inject structural world references,
-and prevent echo chambers.
+"""ai_critic.py: Local LLM critic via generic OpenAI-compatible endpoint.
+Designed to support any local LLM server (Qwen, Llama, Mistral, etc.),
+enforcing epistemic friction, structural world references, and preventing echo chambers.
 """
 import os
 import requests
 
 LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
+LOCAL_MODEL_NAME = os.getenv("LOCAL_MODEL_NAME", "qwen2.5-coder")
 
 def check_server():
     try:
@@ -21,7 +22,7 @@ def critique(observation, subject="general", world_keys=None):
     world_context = f"Known world ontology references: {list(world_keys)}" if world_keys else ""
     
     payload = {
-        "model": "qwen2.5-coder",
+        "model": LOCAL_MODEL_NAME,
         "messages": [
             {
                 "role": "system", 

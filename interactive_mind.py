@@ -21,6 +21,10 @@ def main():
 
     print("--- Eigenlog Fluid Practice ---")
     
+    # Ask for Heat Dial level at start of session
+    heat_input = input("Select AI Heat Dial:\n  [1] Mirror / Supportive\n  [2] Dialectic / Questioning (Default)\n  [3] Forensic / Adversarial\nSelect [1/2/3] (Press Enter for 2): ").strip()
+    heat_level = int(heat_input) if heat_input in ('1', '2', '3') else 2
+    
     mode = input("Select mode:\n  [1] Normal / Database logging only\n  [2] Interactive with Local LLM critique\n  [3] Cold Mode (No AI critique for deep independent thinking)\nSelect [1/2/3]: ").strip()
     use_ai = (mode == '2')
     
@@ -69,7 +73,10 @@ def main():
             print("Observation cannot be empty.")
             continue
             
-        observation = f"{observation_prefix}{observation_input}"
+        epistemic_tag = input("Epistemic Tag: [1] Hypothesis (Default), [2] Subjective Truth [1/2]: ").strip()
+        tag_str = "Subjective Truth" if epistemic_tag == '2' else "Hypothesis"
+
+        observation = f"{observation_prefix}[{tag_str}] {observation_input}"
         measure = input("Quant/Qual Measure or Scale (optional): ").strip() or None
         doubt = input("Any doubt or tension? (optional): ").strip() or None
         
@@ -78,7 +85,7 @@ def main():
         
         if use_ai:
             print("\n[Asking Local LLM for critical dialectic feedback...]")
-            feedback = critique(observation, subject, world_keys=m.world.keys())
+            feedback = critique(observation, subject, world_keys=m.world.keys(), heat_level=heat_level, epistemic_tag=tag_str)
             print(f"Local LLM: {feedback}")
             
             # Interactive feedback & control options

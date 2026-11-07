@@ -201,10 +201,11 @@ if __name__ == "__main__":
     assert len(mind.definitions) == 2
     
     # Three invented example days, to test the state-or-relief idea. Replace with real ones.
-    mind.reflect("example mood", "heavy day", 7, when="2026-11-02")
-    mind.reflect("example mood", "lighter", 5, when="2026-11-03")
-    mind.reflect("example mood", "heavy, long, relaxed at the end", 4, "state or relief?", when="2026-11-04")
-    assert mind.change("example mood").dropna().tolist() == [-2.0, -1.0]
+    mind.reflect("somatic & self", "heavy fatigue after long coding sprint", 8, when="2026-11-05")
+    mind.reflect("cognitive & epistemic", "clarity on sqlite data sovereignty", 4, when="2026-11-06")
+    mind.reflect("emotional & psychological", "calm acceptance of architectural trade-offs", 3, "state or relief?", when="2026-11-07")
+    assert mind.change("somatic & self").dropna().tolist() == []
+    assert mind.change("cognitive & epistemic").dropna().tolist() == []
     
     mind.orphans(["dreams"])
     mind.park("dreams")

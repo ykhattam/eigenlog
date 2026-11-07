@@ -12,6 +12,16 @@ NOT_APPLICABLE = "n/a"
 STATUSES = ("verified", "unverified", "contested")
 COLUMNS = ["id", "when", "subject", "observation", "measure", "doubt", "struggle", "resolved"]
 
+WORLD_REFERENCES = {
+    "Somatic & Self": ["body", "health", "energy", "desire", "mortality", "rest"],
+    "Relational & Social": ["family", "friendship", "romance", "community", "betrayal", "boundaries"],
+    "Cognitive & Epistemic": ["frameworks", "bias", "logic", "uncertainty", "memory", "truth"],
+    "Emotional & Psychological": ["grief", "awe", "obsession", "resentment", "peace", "catharsis"],
+    "Temporal & Existential": ["time", "legacy", "growth", "decay", "purpose", "spirit", "presence"],
+    "Systemic & External": ["culture", "economics", "technology", "nature", "art", "data", "infrastructure"],
+    "Meta & Process": ["quant", "qual", "reflection", "action", "silence", "flow", "friction"]
+}
+
 WORLD = {
     "body": {
         "human": ["organs", "emotions", "thoughts", "behaviours", "sleep", "energy", "tension"],
@@ -76,6 +86,10 @@ class Mind:
         entry = {"id": len(self.entries), "when": when or date.today().isoformat(), "subject": subject, "observation": observation, "measure": measure, "doubt": doubt, "struggle": struggle, "resolved": False}
         self.entries.append(entry)
         return entry["id"]
+
+    def get_last_entry(self, subject):
+        matches = [e for e in self.entries if e["subject"] == subject]
+        return matches[-1] if matches else None
 
     def claim(self, text, status="unverified", test=None, source=None, from_entry=None):
         if status not in STATUSES:

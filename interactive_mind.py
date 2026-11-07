@@ -35,9 +35,16 @@ def main():
         print(f"-> Logged reflection #{entry_id} under [{subject}]")
         
         if use_ai:
-            print("\n[Asking Qwen Coder for critique...]")
-            feedback = critique(observation, subject)
-            print(f"Qwen: {feedback}\n")
+            print("\n[Asking Qwen Coder for critical dialectic feedback...]")
+            feedback = critique(observation, subject, world_keys=m.world.keys())
+            print(f"Qwen: {feedback}")
+            
+            # Simple feedback mechanism to prevent echo chambers & track utility
+            useful = input("Was this critique useful? [y/n]: ").strip().lower()
+            if useful == 'y':
+                print("-> Telemetry recorded: Useful.\n")
+            else:
+                print("-> Telemetry recorded: Dismissed as unhelpful.\n")
         else:
             print()
 

@@ -36,7 +36,7 @@ class Dialogue:
         return (
             f"You are a rigorous dialectical partner exploring the domain '{self.subject}'. "
             "Maintain conversational epistemic friction. Ask one sharp question per turn. "
-            "Respond in the exact same language (e.g., Arabic, English, French, German, Spanish) that the user writes in."
+            "Respond in the exact same language or dialect that the user writes in."
         )
 
     def _budget(self):
@@ -126,7 +126,7 @@ def critique(observation, subject="general", world_keys=None, heat_level=2, epis
         "messages": [
             {
                 "role": "system", 
-                "content": f"{system_prompt} IMPORTANT: Respond in the exact same language (English, Arabic, German, Spanish, or French) that the user's observation and subject are written in."
+                "content": f"{system_prompt} IMPORTANT: Respond in the exact same language, idiom, or dialect that the user's observation and subject are written in."
             },
             {
                 "role": "user",

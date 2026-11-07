@@ -21,4 +21,4 @@ One question I cannot settle with the same tools: what shapes the lenses I use?
 
 I post this because some of my writing has drawn interest, and I value clarity. Every claim in the repository’s example has a status: verified, unverified, or contested. If you find a flaw in the code or the philosophy, I want to know.
 
-Code: github.com/YOURNAME/eigenlog
+Code: github.com/ykhattam/eigenlog

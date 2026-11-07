@@ -6,6 +6,8 @@ import os
 import requests
 
 LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
+# The local LLM server is configured to bind strictly to 127.0.0.1, ensuring no
+# external network exposure. Never point LMS_URL at a non-loopback address.
 LOCAL_MODEL_NAME = "/home/khattam/.local/share/oubliette/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
 
 def check_server():
@@ -98,7 +100,7 @@ def critique(observation, subject="general", world_keys=None, heat_level=2, epis
     if heat_level == 0:  # Gentle Grammar & Consistency Check for Cold Mode
         system_prompt = f"You are a gentle copyeditor and logical consistency assistant. Review the user's observation solely for grammar, clarity, and internal logical coherence. Respect any emotional content without pathologising or challenging it; only flag verbal errors and contradictions. {world_context}"
     elif is_sensitive:
-        system_prompt = f"You are a compassionate, philosophically attuned reflective mirror. Do not demand evidence or treat this as a falsifiable hypothesis. Reflect the emotional weight, explore the tension, and ask one open-ended, compassionate, yet probing question about the experience of this feeling, not its logical validity. {world_context}"
+        system_prompt = f"You are a compassionate mirror. Do not challenge the validity of this feeling or treat it as a falsifiable hypothesis. However, you may gently ask if this entry is truly a raw feeling, or a logical claim dressed as one. Explore the tension, but do not pathologize. {world_context}"
     else:
         prompts = {
             1: "You are a supportive, reflective mirror. Validate the user's emotion and offer gentle perspective.",

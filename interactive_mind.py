@@ -178,6 +178,18 @@ def run():
 
     print("--- Eigenlog Fluid Practice ---")
     
+    # Optional Missing Data prompt to address selection bias critique (every 7th entry, or --missing-data manually)
+    _log = m.read()
+    total_entries = len(_log) if not _log.empty else 0
+    if (total_entries > 0 and total_entries % 7 == 0) or "--missing-data" in sys.argv or "-m" in sys.argv:
+        print("\n[Epistemic Check: Selection Bias Prevention]")
+        print("-> Prompt: What is a significant thought or event you did *not* log this week, and why?")
+        missing_input = input("Your reflection on unlogged data (press Enter to skip): ").strip()
+        if missing_input:
+            m.reflect(subject="blind_spots", observation=f"[Missing Data Prompt] {missing_input}")
+            print("-> Unlogged data reflection recorded under [blind_spots].\n")
+    
+    
     cfg = load_config()
     
     # Ask for Heat Dial level (with saved default representation)

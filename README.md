@@ -33,7 +33,7 @@ python3 interactive_mind.py
 
 ## Features
 - **Expanded World Ontology:** Covers body, brain, emotions (joy, fear, anger, sadness), spirit, love, grief, betrayal, culture, technology, and more.
-- **100% Local & Private:** No cloud sync, no tracking, no AI telemetry—your thoughts stay strictly on your machine.
+- **100% Local & Private:** No cloud sync, no tracking, no AI telemetry—your thoughts stay strictly on your machine. (The local LLM server is configured to bind strictly to 127.0.0.1, ensuring no external network exposure.)
 - **SQLite storage with a Pydantic schema:** Entries live in `eigenlog.db` and every row is validated against a `LogEntry` model on read and write, so the columns cannot silently drift. Legacy `log.csv` files are imported automatically on first run and renamed to `log.csv.migrated`.
 - **SQL Support:** Query your logs directly (`sqlite3 eigenlog.db "SELECT * FROM entries WHERE subject='emotions'"`).
 

@@ -27,6 +27,13 @@ def save_config(mode, heat_level):
         pass
 
 def main():
+    try:
+        run()
+    except (KeyboardInterrupt, EOFError):
+        print("\n-> Session ended.")
+        return
+
+def run():
     m = Mind()
     
     # Handle Frictionless Micro-Log CLI Arguments (eigenlog -q / quick)
@@ -122,7 +129,8 @@ def main():
         print(f"-> Logged reflection #{entry_id} under [{subject}]")
         
         if use_ai:
-            print("\n[Asking Local LLM for critical dialectic feedback...]")
+            label = "grammar & coherence review" if heat_level == 0 else "critical dialectic feedback"
+            print(f"\n[Asking Local LLM for {label}...]")
             feedback = critique(observation, subject, world_keys=m.world.keys(), heat_level=heat_level, epistemic_tag=tag_str)
             print(f"Local LLM: {feedback}")
             

@@ -6,7 +6,8 @@ from eigenlog import Mind
 def main():
     m = Mind()
     print("--- Eigenlog Fluid Practice ---")
-    print("Tip: Subjects, categories, and tags are now fully fluid. Express freely.\n")
+    print("Tip: Subjects, categories, and tags are now fully fluid. Express freely.")
+    print(f"Known world references for inspiration: {list(m.world.keys())}\n")
     
     while True:
         subject = input("Subject / Domain (or 'quit'): ").strip()

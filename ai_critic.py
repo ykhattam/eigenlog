@@ -20,14 +20,14 @@ def critique(observation, subject="general"):
     payload = {
         "model": "qwen2.5-coder",
         "messages": [
-            {"role": "system", "content": "You are a rigorous philosophical and cognitive critic reviewing a personal eigenlog entry. Be concise, precise, and constructively critical."},
-            {"role": "user", "content": f"Subject: {subject}\nObservation: {observation}\n\nCritique this reflection for logical consistency, potential blind spots, or deeper questions."}
+            {"role": "system", "content": "You are a concise cognitive critic."},
+            {"role": "user", "content": f"Critique briefly (1 sentence): [{subject}] {observation}"}
         ],
-        "temperature": 0.7,
-        "max_tokens": 250
+        "temperature": 0.5,
+        "max_tokens": 50
     }
     try:
-        r = requests.post(LMS_URL, json=payload, timeout=5)
+        r = requests.post(LMS_URL, json=payload, timeout=2)
         if r.status_code == 200:
             data = r.json()
             return data["choices"][0]["message"]["content"].strip()

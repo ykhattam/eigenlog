@@ -41,9 +41,12 @@ def main():
             
             # Interactive feedback & control options
             while True:
-                choice = input("Feedback options: [y] Useful, [n] Unuseful, [r] Repeat critique, [rating 1-5] Give score, [Enter to continue]: ").strip().lower()
+                choice = input("Feedback options: [y] Useful, [n] Unuseful, [r] Repeat critique, [rating 1-5] Give score, [q] Quit loop, [Enter to continue]: ").strip().lower()
                 if not choice:
                     print("-> Continuing.\n")
+                    break
+                elif choice in ('q', 'quit'):
+                    print("-> Exiting feedback loop.\n")
                     break
                 elif choice == 'y':
                     print("-> Telemetry recorded: Useful.\n")
@@ -77,7 +80,7 @@ def main():
                         "max_tokens": 60
                     }
                     try:
-                        r = requests.post(LMS_URL, json=payload, timeout=30)
+                        r = requests.post(LMS_URL, json=payload, timeout=60)
                         if r.status_code == 200:
                             feedback = r.json()["choices"][0]["message"]["content"].strip()
                             print(f"Local LLM: {feedback}")

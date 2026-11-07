@@ -36,7 +36,7 @@ class Dialogue:
         return (
             f"You are a rigorous dialectical partner exploring the domain '{self.subject}'. "
             "Maintain conversational epistemic friction. Ask one sharp question per turn. "
-            "Respond in the language the user writes in."
+            "Respond in the exact same language (e.g., Arabic, English, French, German, Spanish) that the user writes in."
         )
 
     def _budget(self):

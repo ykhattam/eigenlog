@@ -39,47 +39,52 @@ def main():
             feedback = critique(observation, subject, world_keys=m.world.keys())
             print(f"Local LLM: {feedback}")
             
-            # Interactive dialogue loop after observation
+            # Interactive feedback & control options
             while True:
-                followup = input("\n[Dialogue] Reply to critique or press Enter to continue: ").strip()
-                if not followup:
+                choice = input("Feedback options: [y] Useful, [n] Unuseful, [r] Repeat critique, [rating 1-5] Give score, [Enter to continue]: ").strip().lower()
+                if not choice:
+                    print("-> Continuing.\n")
                     break
-                
-                print("[Thinking...]")
-                # Append dialogue context
-                dialogue_prompt = f"Previous observation: {observation}\nCritique: {feedback}\nUser response: {followup}\n\nProvide a brief, challenging follow-up question or perspective (1 sentence):"
-                
-                # Make a quick follow-up request
-                import os
-                import requests
-                LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
-                LOCAL_MODEL_NAME = os.getenv("LOCAL_MODEL_NAME", "qwen2.5-coder")
-                payload = {
-                    "model": LOCAL_MODEL_NAME,
-                    "messages": [
-                        {"role": "system", "content": "You are a rigorous dialectical opponent maintaining conversational epistemic friction."},
-                        {"role": "user", "content": dialogue_prompt}
-                    ],
-                    "temperature": 0.6,
-                    "max_tokens": 60
-                }
-                try:
-                    r = requests.post(LMS_URL, json=payload, timeout=30)
-                    if r.status_code == 200:
-                        feedback = r.json()["choices"][0]["message"]["content"].strip()
-                        print(f"Local LLM: {feedback}")
-                    else:
-                        print("[LLM Error]")
-                        break
-                except Exception as e:
-                    print(f"[Error: {e}]")
+                elif choice == 'y':
+                    print("-> Telemetry recorded: Useful.\n")
                     break
-
-            useful = input("Was this critique useful? [y/n]: ").strip().lower()
-            if useful == 'y':
-                print("-> Telemetry recorded: Useful.\n")
-            else:
-                print("-> Telemetry recorded: Dismissed as unhelpful.\n")
+                elif choice == 'n':
+                    print("-> Telemetry recorded: Unhelpful.\n")
+                    break
+                elif choice == 'r':
+                    print("\n[Re-generating critique...]")
+                    feedback = critique(observation, subject, world_keys=m.world.keys())
+                    print(f"Local LLM: {feedback}\n")
+                elif choice.isdigit() and 1 <= int(choice) <= 5:
+                    print(f"-> Telemetry recorded: Rating {choice}/5.\n")
+                    break
+                else:
+                    # Treat input as a direct dialogue/reply
+                    print("[Thinking...]")
+                    dialogue_prompt = f"Previous observation: {observation}\nCritique: {feedback}\nUser response: {choice}\n\nProvide a brief, challenging follow-up question or perspective (1 sentence):"
+                    
+                    import os
+                    import requests
+                    LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
+                    LOCAL_MODEL_NAME = os.getenv("LOCAL_MODEL_NAME", "qwen2.5-coder")
+                    payload = {
+                        "model": LOCAL_MODEL_NAME,
+                        "messages": [
+                            {"role": "system", "content": "You are a rigorous dialectical opponent maintaining conversational epistemic friction."},
+                            {"role": "user", "content": dialogue_prompt}
+                        ],
+                        "temperature": 0.6,
+                        "max_tokens": 60
+                    }
+                    try:
+                        r = requests.post(LMS_URL, json=payload, timeout=30)
+                        if r.status_code == 200:
+                            feedback = r.json()["choices"][0]["message"]["content"].strip()
+                            print(f"Local LLM: {feedback}")
+                        else:
+                            print("[LLM Error]")
+                    except Exception as e:
+                        print(f"[Error: {e}]")
         else:
             print()
 

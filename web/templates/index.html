@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eigenlog — local reflection</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+  <div id="status">
+    <span class="dot" id="status-dot"></span>
+    <span id="status-text">Checking local LLM server…</span>
+  </div>
+  <h1>Eigenlog</h1>
+  <p class="subtitle">A mind you can run — locally, privately, glass.</p>
+</header>
+
+<main>
+
+  <!-- Log form -->
+  <section class="glass">
+    <h2 style="margin-top:0">Log a reflection</h2>
+    <form id="reflect-form">
+      <div>
+        <label>Subject / Domain</label>
+        <input name="subject" placeholder="e.g. emotions, work, code" required>
+      </div>
+      <div style="grid-column: 1 / -1">
+        <label>Observation / Thought</label>
+        <textarea name="observation" placeholder="What’s on your mind?" required></textarea>
+      </div>
+      <div>
+        <label>Measure / Scale (optional)</label>
+        <input name="measure" placeholder="e.g. 7/10, calm, high">
+      </div>
+      <div>
+        <label>Doubt / Tension (optional)</label>
+        <input name="doubt" placeholder="Anything unresolved?">
+      </div>
+      <div style="grid-column: 1 / -1">
+        <label>Epistemic Tag</label>
+        <select name="epistemic_tag">
+          <option value="hypothesis" selected>Hypothesis — open to dialectical friction</option>
+          <option value="subjective truth">Subjective Truth — shielded from deconstruction</option>
+        </select>
+      </div>
+      <div class="row-actions">
+        <button type="submit">Log Reflection</button>
+      </div>
+    </form>
+    <div id="quick-msg"></div>
+  </section>
+
+  <!-- AI critique -->
+  <section class="glass">
+    <h2 style="margin-top:0">Local LLM Critic</h2>
+    <p style="font-size:0.85rem; color:#64748b; margin:0 0 12px 0">
+      Powered by your llama-server on 127.0.0.1:8080. Nothing leaves this machine.
+    </p>
+    <div>
+      <label>Observation to critique</label>
+      <textarea id="crit-obs" rows="3" placeholder="Paste an observation here…"></textarea>
+    </div>
+    <div>
+      <label>Subject</label>
+      <input id="crit-subj" placeholder="e.g. emotions">
+    </div>
+    <div>
+      <label>Heat Dial</label>
+      <div class="heat-chips">
+        <button type="button" class="heat-chip active" data-val="2">Dialectic</button>
+        <button type="button" class="heat-chip" data-val="0">Grammar &amp; Logic</button>
+        <button type="button" class="heat-chip" data-val="1">Mirror</button>
+        <button type="button" class="heat-chip" data-val="3">Forensic</button>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button id="crit-btn" type="button">Get Critique</button>
+      <button type="button" class="secondary" onclick="document.getElementById('crit-obs').value=''; document.getElementById('crit-out').textContent='';">Clear</button>
+    </div>
+    <div class="critique"><pre id="crit-out"></pre></div>
+  </section>
+
+  <!-- Entries -->
+  <section class="glass">
+    <h2 style="margin-top:0">Your Log</h2>
+    <div id="entries"></div>
+  </section>
+
+</main>
+
+<footer>
+  Eigenlog — local-first, 0o600 SQLite, no cloud, no telemetry. <br>
+  <a href="http://127.0.0.1:5000/api/server-status" style="color:rgba(255,255,255,0.9)">Server status</a>
+</footer>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

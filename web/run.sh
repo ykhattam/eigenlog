@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start eigenlog web UI (localhost only).
+# Start eigenlog web UI (NiceGUI, localhost only).
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

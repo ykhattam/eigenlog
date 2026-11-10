@@ -8,7 +8,12 @@ import requests
 LMS_URL = os.getenv("LMS_URL", "http://127.0.0.1:8080/v1/chat/completions")
 # The local LLM server is configured to bind strictly to 127.0.0.1, ensuring no
 # external network exposure. Never point LMS_URL at a non-loopback address.
-LOCAL_MODEL_NAME = "/home/khattam/.local/share/oubliette/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+# Model path is intentionally not hardcoded for other users: set EIGENLOG_MODEL
+# to your own GGUF, or run your own llama-server and set LMS_URL instead.
+LOCAL_MODEL_NAME = os.getenv(
+    "EIGENLOG_MODEL",
+    "/home/khattam/.local/share/oubliette/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+)
 
 def check_server():
     try:
